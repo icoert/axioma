@@ -50,6 +50,14 @@ npm run deploy -- --project ID_PROIECT_FIREBASE
 ```
 
 Comanda publică directorul `dist` și regulile Firestore. Nu include fișierul `.env.local` în controlul versiunilor.
+## Recapitulări opționale · 1.2.1
+
+În pagina „Recapitulări” poți revedea clasele V–VIII, fiecare separat sau într-un parcurs comun, și clasele IX–XII. Gimnaziul are 16 repere cu exemple rezolvate și 48 de exerciții. Acestea sunt recapitulări de bază; parcursul complet de gimnaziu rămâne planificat.
+
+La începutul unei clase poți alege recapitularea recomandată sau poți merge direct la materia nouă: V–VIII înainte de IX, IX înainte de X, X înainte de XI, XI înainte de XII. Recapitulările liceale urmează programa selectată și nu schimbă clasa curentă. Antrenamentele sunt fără XP și își păstrează sesiunea în aceeași filă după reîncărcare.
+
+Selectorul laboratorului are descrieri scurte și suport pentru tastatură și atingere. Deschide cu Enter/Space, navighează cu săgețile sau Home/End, confirmă cu Enter și închide cu Escape. Resetarea păstrează exemplul ales.
+
 ## Învățare și contribuții
 
 Versiunea 1.2.0 include 59 de lecții, câte trei exerciții suplimentare pentru fiecare și nouă laboratoare cu 27 de exemple ghidate. Exercițiile suplimentare se reiau din aceeași filă după reîncărcare și nu acordă XP; verificările de stăpânire își păstrează regulile existente. Progresul acestui antrenament rămâne în sesiunea browserului, fără sincronizare Firebase.

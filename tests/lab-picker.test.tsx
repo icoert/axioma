@@ -1,0 +1,10 @@
+// @vitest-environment jsdom
+import { afterEach,it,expect,vi } from 'vitest';
+import { cleanup,fireEvent,render,screen } from '@testing-library/react';
+import { LabPicker } from '../src/components/LabPicker';
+afterEach(cleanup);
+const choices=[{id:'one',title:'Primul exemplu',description:'Un minim.'},{id:'two',title:'Al doilea exemplu',description:'Un maxim.'},{id:'three',title:'Al treilea exemplu'}];
+// jsdom has no layout scrolling; browser scenarios verify viewport placement and scrolling.
+Element.prototype.scrollIntoView=vi.fn();
+it('navigates by keyboard, selects on Enter and restores trigger focus',()=>{const change=vi.fn();render(<LabPicker label="Exemplu de laborator" value="one" choices={choices} onChange={change}/>);const trigger=screen.getByRole('combobox');trigger.focus();fireEvent.keyDown(trigger,{key:'ArrowDown'});expect(trigger.getAttribute('aria-expanded')).toBe('true');fireEvent.keyDown(trigger,{key:'End'});expect(trigger.getAttribute('aria-activedescendant')).toBe(screen.getByRole('option',{name:'Al treilea exemplu'}).id);fireEvent.keyDown(trigger,{key:'ArrowUp'});fireEvent.keyDown(trigger,{key:'Enter'});expect(change).toHaveBeenCalledWith('two');expect(screen.queryByRole('listbox')).toBeNull();expect(document.activeElement).toBe(trigger);});
+it('supports pointer choice, Escape, outside dismissal, and Tab without selecting',()=>{const change=vi.fn();render(<LabPicker label="Exemplu de laborator" value="one" choices={choices} onChange={change}/>);const trigger=screen.getByRole('combobox');fireEvent.click(trigger);expect(screen.getByRole('option',{name:'Primul exemplu'}).getAttribute('aria-selected')).toBe('true');fireEvent.click(screen.getByRole('option',{name:'Al doilea exemplu'}));expect(change).toHaveBeenCalledOnce();fireEvent.click(trigger);fireEvent.keyDown(trigger,{key:'Escape'});expect(screen.queryByRole('listbox')).toBeNull();fireEvent.click(trigger);fireEvent.pointerDown(document.body);expect(screen.queryByRole('listbox')).toBeNull();fireEvent.click(trigger);fireEvent.keyDown(trigger,{key:'Tab'});expect(screen.queryByRole('listbox')).toBeNull();expect(change).toHaveBeenCalledOnce();});

@@ -10,6 +10,21 @@ export interface ProductRelease {
 
 export const productReleases:ProductRelease[]=[
  {
+  version:'1.2.1',
+  tag:'v1.2.1',
+  releasedAt:'2026-10-09T16:51:43+03:00',
+  title:'Un început mai sigur, în ritmul tău',
+  summary:'Recapitulări opționale înainte de fiecare clasă și un selector de laborator mai clar, adaptat ecranului tău.',
+  features:[
+   'Selector de exemple în laborator cu descrieri, navigare prin tastatură și alegere prin atingere.',
+   'Recapitulări pentru clasele V–VIII: 16 repere, exemple rezolvate și 48 de exerciții noi.',
+   'Recapitulare V–VIII recomandată înainte de clasa a IX-a, cu opțiunea de a începe direct liceul.',
+   'Recapitulări pentru fiecare clasă IX–XII, adaptate programei selectate; anul anterior este recomandat înainte de clasa următoare.',
+   'Exerciții de recapitulare reluabile, cu explicații și fără modificarea XP sau a scorurilor de stăpânire.',
+   'Îmbunătățiri pentru telefoane înguste, orientare peisaj, tablete, ecrane mari și meniuri care rămân în interiorul ecranului.'
+  ]
+ },
+ {
   version:'1.2.0',
   tag:'v1.2.0',
   releasedAt:'2026-10-09T16:10:00+03:00',
