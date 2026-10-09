@@ -10,6 +10,18 @@ export interface ProductRelease {
 
 export const productReleases:ProductRelease[]=[
  {
+  version:'1.2.3',tag:'v1.2.3',releasedAt:'2026-10-09T20:30:00+03:00',
+  title:'Trei idei noi, în fiecare zi',
+  summary:'Puzzle-uri zilnice de logică matematică, cronometru și clasament opțional, cu elemente care încap corect pe mobil.',
+  features:[
+   'Trei puzzle-uri zilnice: șiruri de numere, balanțe cu necunoscute și numărare logică. Aceeași serie pentru toți, schimbată la 00:00 UTC.',
+   'Indiciu, grilă explorabilă, explicații matematice redate clar, reluare după închiderea paginii și reexersare fără schimbarea XP.',
+   'Cronometru local pentru vizitatori; o încercare zilnică măsurată de server pentru utilizatorii conectați, cu pauzele incluse.',
+   'Clasament după timpul de rezolvare, publicare opțională cu alias ales și posibilitatea de a retrage rezultatul.',
+   'Eticheta „∞ posibilități”, formulele și ilustrația din cardul principal rămân în interiorul cardului pe telefoane, tablete și desktop.'
+  ]
+ },
+ {
   version:'1.2.2',tag:'v1.2.2',releasedAt:'2026-10-09T19:30:00+03:00',
   title:'Un ritm bun, cu ideile tale',
   summary:'Feedback privat, noutăți la îndemână, remindere opționale și antrenamente mai vii, cu matematică redată clar.',

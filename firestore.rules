@@ -229,6 +229,54 @@ service cloud.firestore {
         && request.resource.data.response is string && request.resource.data.response.size() <= 1000;
       allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
+    function currentBrainDay() {
+      let millis = request.time.toMillis();
+      return (millis - millis % 86400000) / 86400000;
+    }
+    function brainAnswer(day, index) {
+      let seed = day % 997;
+      let a = 2 + seed % 8;
+      let b = 3 + ((seed - seed % 8) / 8) % 9;
+      let c = 2 + ((seed - seed % 72) / 72) % 5;
+      return index == 0
+        ? (day % 3 == 0 ? (a+3)*(a+3) : day % 3 == 1 ? a+4*b+6 : a+2*b-2*c)
+        : index == 1 ? a*b
+        : day % 2 == 0 ? 3*c*(c+1) / 2 : (c == 2 ? 8 : c == 3 ? 13 : c == 4 ? 21 : c == 5 ? 34 : 55);
+    }
+    function validBrainAnswers(day, answers) {
+      return answers is list && answers.size() == 3
+        && answers[0] == brainAnswer(day, 0) && answers[1] == brainAnswer(day, 1) && answers[2] == brainAnswer(day, 2);
+    }
+    match /brainDays/{dayId}/attempts/{uid} {
+      allow get: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['day', 'status', 'startedAt', 'finishedAt', 'answers'])
+        && request.resource.data.keys().hasAll(['day', 'status', 'startedAt', 'finishedAt', 'answers'])
+        && request.resource.data.day == currentBrainDay() && dayId == string(request.resource.data.day)
+        && request.resource.data.status == 'running' && request.resource.data.startedAt == request.time
+        && request.resource.data.finishedAt == null && request.resource.data.answers == [];
+      allow update: if isOwner(uid) && resource.data.status == 'running'
+        && resource.data.day == currentBrainDay()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt', 'answers'])
+        && request.resource.data.status == 'done' && request.resource.data.finishedAt == request.time
+        && request.resource.data.finishedAt >= resource.data.startedAt
+        && validBrainAnswers(resource.data.day, request.resource.data.answers);
+    }
+    match /brainDays/{dayId}/scores/{uid} {
+      function validBrainScore() {
+        let attempt = getAfter(/databases/$(database)/documents/brainDays/$(dayId)/attempts/$(uid)).data;
+        return request.resource.data.keys().hasOnly(['alias', 'startedAt', 'finishedAt'])
+          && request.resource.data.keys().hasAll(['alias', 'startedAt', 'finishedAt'])
+          && request.resource.data.alias is string && request.resource.data.alias.size() >= 2 && request.resource.data.alias.size() <= 24
+          && request.resource.data.alias.matches('[A-Za-zÀ-ÖØ-öø-ɏ0-9 ._-]{2,24}')
+          && attempt.status == 'done' && validBrainAnswers(attempt.day, attempt.answers)
+          && request.resource.data.startedAt == attempt.startedAt && request.resource.data.finishedAt == attempt.finishedAt;
+      }
+      allow get: if true;
+      allow list: if request.query.limit != null && request.query.limit <= 100;
+      allow create: if isOwner(uid) && validBrainScore();
+      allow delete: if isOwner(uid);
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

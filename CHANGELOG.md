@@ -1,5 +1,15 @@
 # Axioma · release notes
 
+## 1.2.3 — 2026-10-09
+
+- Fixed clipped dashboard hero labels, including “∞ posibilități”, by containing artwork and formulas in responsive flow. Checks now inspect child bounds as well as document overflow, at 12 sizes and enlarged text.
+- Added three original daily Romanian brain puzzles covering number patterns, balance equations and counting. Everyone receives the same UTC-day set, with hints, rendered math, exploratory grids, worked solutions, local resumption and unranked retry practice. Existing lesson progress and XP remain unchanged.
+- Added local guest timing and a single daily account attempt measured by Firestore server timestamps, including pauses. Rules validate the date, correct answers, ownership, immutable start/finish and public score timestamps.
+- Added an opt-in time ranking with a chosen alias, exact-time ties, withdrawal and bounded pagination. Rankings explicitly remain partial until all pages are loaded. Public records contain only alias and timestamps; these source-visible puzzles are friendly training rather than a proctored competition.
+- Added generation, rendering, session/offline retry, privacy, server timing, rollover, clipping and browser accessibility coverage.
+
+Validation: `npm run check` passed with Node 24, Java 21 and `PW_CHANNEL=chrome`: production build, 66 unit/component tests, 76 desktop/mobile Playwright scenarios, and 17 Firestore rules tests. Coverage includes 6,000 daily parameter sets, rendered math, trusted timing and immutable attempts, opt-in publication/withdrawal, offline retry, UTC rollover, corrupted session recovery, negative answers on mobile, counting-grid interaction, accessibility, and clipping checks at 12 widths plus enlarged text. The mobile hero and puzzle screen were visually reviewed.
+
 ## 1.2.2 — 2026-10-09
 
 - Added private feedback, problem reports and feature requests, guest drafts, account-scoped history and administrator replies/status triage. Firestore validates content, identity, timestamps and an atomic one-message-per-minute cooldown.

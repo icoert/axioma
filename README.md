@@ -74,3 +74,9 @@ Feedback and feature requests are available at `/feedback`, with private authent
 Release acknowledgements are account-scoped locally. `public/release.json` must match the package and release feed; the app checks this uncached manifest every five minutes and when it becomes visible, and offers manual reload for newer deployments. Calendar feeds use floating local time. See [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545) for calendar recurrence/time semantics.
 
 Teaching prose uses `MathText`/`GlossaryText` for inline KaTeX and semantic MathML. Explicit `$TeX$` overrides automatic notation detection for ambiguous expressions; standalone formula blocks continue using `MathFormula`. Keep plain question IDs unchanged. Quiz shortcuts: 1–4 select an answer, Enter verifies/continues outside buttons and text fields. Timed tests show neutral milestones and no answer feedback until submission. Mistake retries have separate session storage and never award XP.
+
+### Version 1.2.3
+
+Daily brain puzzles are at `/puzzle`, linked from the dashboard, challenges and footer. Three deterministic authored families rotate by UTC date; guest sessions stay local. Signed-in users explicitly start one attempt per day. Firestore rules validate answers and require server start/finish timestamps. Pauses and reloads count toward elapsed time; no lesson XP is awarded.
+
+Public ranking is opt-in with a chosen alias, and withdrawal deletes the public score. Attempts remain private. Board reads are paginated (100 per page); the UI states when the loaded ranking is partial. Browser duration is never accepted as a verified score. The puzzles are source-visible training, so this is not a proctored or prize competition. No scheduled backend or paid push service is required. See [the acceptance spec](docs/specs/daily-brain-puzzles.md).

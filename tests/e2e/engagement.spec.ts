@@ -24,5 +24,5 @@ test('new engagement pages and math-heavy quizzes fit narrow phones and pass acc
 });
 
 test('an open app detects a newly deployed release without interrupting a quiz',async({page})=>{
- await page.route('**/release.json',route=>route.fulfill({json:{version:'1.2.3'}}));await page.goto('/quiz/recap/5');await page.getByRole('radio').first().check();await expect(page.getByRole('region',{name:'Actualizare disponibilă'})).toContainText('v1.2.3');await expect(page.getByRole('button',{name:'Reîncarcă pentru versiunea nouă'})).toBeVisible();await page.reload();await expect(page.getByRole('radio').first()).toBeChecked();await expect(page.getByText('Întrebarea 1 din 12')).toBeVisible();
+ await page.route('**/release.json',route=>route.fulfill({json:{version:'1.2.4'}}));await page.goto('/quiz/recap/5');await page.getByRole('radio').first().check();await expect(page.getByRole('region',{name:'Actualizare disponibilă'})).toContainText('v1.2.4');await expect(page.getByRole('button',{name:'Reîncarcă pentru versiunea nouă'})).toBeVisible();await page.reload();await expect(page.getByRole('radio').first()).toBeChecked();await expect(page.getByText('Întrebarea 1 din 12')).toBeVisible();
 });
