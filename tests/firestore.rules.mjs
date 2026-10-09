@@ -1,0 +1,14 @@
+import { readFileSync } from 'node:fs';
+import { before,after,beforeEach,test } from 'node:test';
+import { assertFails,assertSucceeds,initializeTestEnvironment } from '@firebase/rules-unit-testing';
+import { doc,getDoc,setDoc,deleteDoc,collection,getDocs } from 'firebase/firestore';
+let env;
+const valid={schema:1,results:{},dates:[],grade:9,curriculum:'2026',lastLesson:null,updatedAt:'2026-10-09T12:00:00.000Z'};
+before(async()=>{env=await initializeTestEnvironment({projectId:'demo-axioma',firestore:{host:'127.0.0.1',port:8080,rules:readFileSync('firestore.rules','utf8')}});});
+beforeEach(async()=>env.clearFirestore());after(async()=>env?.cleanup());
+const ref=(context,uid='alice')=>doc(context.firestore(),'users',uid,'progress','main');
+test('owner can create, read, update, and delete their progress',async()=>{const r=ref(env.authenticatedContext('alice'));await assertSucceeds(setDoc(r,valid));await assertSucceeds(getDoc(r));await assertSucceeds(setDoc(r,{...valid,grade:12}));await assertSucceeds(deleteDoc(r));});
+test('unauthenticated visitors cannot read or write cloud progress',async()=>{const r=ref(env.unauthenticatedContext());await assertFails(setDoc(r,valid));await assertFails(getDoc(r));});
+test('another account cannot read, update or delete user progress',async()=>{await assertSucceeds(setDoc(ref(env.authenticatedContext('alice')),valid));const r=ref(env.authenticatedContext('bob'));await assertFails(getDoc(r));await assertFails(setDoc(r,valid));await assertFails(deleteDoc(r));});
+test('invalid shape, oversized lists, and unsupported grades are rejected',async()=>{const r=ref(env.authenticatedContext('alice'));for(const bad of [{...valid,admin:true},{...valid,grade:99},{...valid,schema:2},{...valid,dates:Array(367).fill('2026-10-09')},{...valid,results:[]},{...valid,curriculum:'all'}])await assertFails(setDoc(r,bad));});
+test('unlisted collections and user enumeration are denied',async()=>{const db=env.authenticatedContext('alice').firestore();await assertFails(getDocs(collection(db,'users')));await assertFails(setDoc(doc(db,'leaderboard','alice'),{xp:9999}));await assertFails(setDoc(doc(db,'users','alice','progress','other'),valid));});

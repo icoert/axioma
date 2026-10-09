@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    match /users/{uid}/progress/main {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['schema', 'results', 'dates', 'grade', 'curriculum', 'lastLesson', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['schema', 'results', 'dates', 'grade', 'curriculum', 'lastLesson', 'updatedAt'])
+        && request.resource.data.schema == 1
+        && request.resource.data.results is map && request.resource.data.results.size() <= 1000
+        && request.resource.data.dates is list && request.resource.data.dates.size() <= 366
+        && request.resource.data.grade in [9, 10, 11, 12]
+        && request.resource.data.curriculum in ['legacy', '2026']
+        && (request.resource.data.lastLesson == null || (request.resource.data.lastLesson is string && request.resource.data.lastLesson.size() <= 100))
+        && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 30;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

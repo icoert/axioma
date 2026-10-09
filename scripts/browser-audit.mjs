@@ -1,0 +1,6 @@
+import { chromium } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import fs from 'node:fs/promises';
+const browser=await chromium.launch({channel:process.env.PW_CHANNEL??'chromium'});const all=[];
+for(const width of [1440,390]){const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'});const page=await context.newPage();for(const route of ['/','/materie','/laborator','/provocari','/ranguri','/viitor','/cont','/lectie/gradul-doi','/quiz/lesson/logica']){await page.goto('http://127.0.0.1:5173'+route);await page.locator('h1').waitFor();await page.evaluate(()=>document.fonts.ready);const r=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();all.push({width,route,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),violations:r.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))}))});if(route==='/')await page.screenshot({path:`/private/tmp/axioma-${width}.png`,fullPage:true});}await context.close();}
+await fs.writeFile('/private/tmp/axioma-audit.json',JSON.stringify(all,null,2));console.log(JSON.stringify(all.filter(x=>x.violations.length||x.overflow),null,2));await browser.close();
