@@ -43,11 +43,16 @@ test('account actions, export, roadmap and unknown routes',async({page})=>{
  await page.goto('/cont');await expect(page.getByRole('button',{name:'Continuă cu Google'})).toBeEnabled();const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Descarcă progresul'}).click();expect((await downloadPromise).suggestedFilename()).toMatch(/axioma-progres/);await page.goto('/viitor');await expect(page.getByRole('heading',{name:'Matematică pentru clasele V–VIII'})).toBeVisible();await page.goto('/nu-exista');await expect(page.getByRole('heading',{name:'Pagina nu a fost găsită.'})).toBeVisible();
 });
 
+test('community asks guests to sign in and admin access stays restricted',async({page})=>{
+ await page.goto('/prieteni');await expect(page.getByRole('heading',{name:'Prieteni și dueluri.'})).toBeVisible();await expect(page.getByRole('button',{name:'Continuă cu Google'})).toBeEnabled();await expect(page.getByText('CODUL TĂU DE PRIETEN')).toHaveCount(0);
+ await page.goto('/admin');await expect(page.getByRole('heading',{name:'Panoul de administrare'})).toBeVisible();await expect(page.getByText('Conectează-te cu un cont de administrator.')).toBeVisible();
+});
+
 test('invalid storage recovers without crashing',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('axioma:guest','{bad json'));await page.goto('/');await expect(page.getByRole('heading',{name:/Salut/})).toBeVisible();await expect(page.locator('.xp-chip')).toContainText('0 XP');
 });
 
 test('all primary pages fit the viewport and have no serious accessibility violations',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
- for(const route of ['/','/materie','/laborator','/provocari','/ranguri','/viitor','/cont','/lectie/gradul-doi','/quiz/lesson/logica']){await page.goto(route);await expect(page.locator('h1')).toBeVisible();await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.filter(v=>['critical','serious'].includes(v.impact??'')).map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))})),`${route}: ${JSON.stringify(result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})))}`).toEqual([]);}
+ for(const route of ['/','/materie','/laborator','/provocari','/prieteni','/ranguri','/viitor','/cont','/admin','/lectie/gradul-doi','/quiz/lesson/logica']){await page.goto(route);await expect(page.locator('h1')).toBeVisible();await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.filter(v=>['critical','serious'].includes(v.impact??'')).map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))})),`${route}: ${JSON.stringify(result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})))}`).toEqual([]);}
 });

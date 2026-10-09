@@ -1,9 +1,136 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email == 'silviuvaj@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    function validGrade(value) { return value in [9, 10, 11, 12]; }
+    function validCurriculum(value) { return value in ['legacy', '2026']; }
+    function validDate(value) { return value is string && value.size() <= 30; }
+    function validName(value) { return value is string && value.size() > 0 && value.size() <= 100; }
+    function validPhoto(value) { return value == null || (value is string && value.size() <= 2048); }
+    function validStats(data) {
+      return data is map
+        && data.keys().hasOnly(['xp', 'rank', 'lessonsCompleted', 'testsPassed', 'dailyChallenges', 'studyDays', 'currentStreak', 'activitiesAttempted', 'activitiesPassed', 'averageScore'])
+        && data.keys().hasAll(['xp', 'rank', 'lessonsCompleted', 'testsPassed', 'dailyChallenges', 'studyDays', 'currentStreak', 'activitiesAttempted', 'activitiesPassed', 'averageScore'])
+        && data.xp is int && data.xp >= 0
+        && validName(data.rank)
+        && data.lessonsCompleted is int && data.lessonsCompleted >= 0
+        && data.testsPassed is int && data.testsPassed >= 0
+        && data.dailyChallenges is int && data.dailyChallenges >= 0
+        && data.studyDays is int && data.studyDays >= 0 && data.studyDays <= 366
+        && data.currentStreak is int && data.currentStreak >= 0 && data.currentStreak <= 366
+        && data.activitiesAttempted is int && data.activitiesAttempted >= 0
+        && data.activitiesPassed is int && data.activitiesPassed >= 0
+        && data.averageScore is int && data.averageScore >= 0 && data.averageScore <= 100;
+    }
+    function validAccount(uid, data) {
+      return data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'lastSeenAt', 'grade', 'curriculum', 'stats'])
+        && data.keys().hasAll(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'lastSeenAt', 'grade', 'curriculum', 'stats'])
+        && data.uid == uid && data.email == request.auth.token.email
+        && validName(data.displayName) && validPhoto(data.photoURL)
+        && validDate(data.createdAt) && validDate(data.lastSeenAt)
+        && validGrade(data.grade) && validCurriculum(data.curriculum)
+        && validStats(data.stats);
+    }
+    function validProfile(uid, data) {
+      return data.keys().hasOnly(['uid', 'displayName', 'photoURL', 'grade', 'rank', 'xp', 'currentStreak', 'recentStudyDates', 'updatedAt'])
+        && data.keys().hasAll(['uid', 'displayName', 'photoURL', 'grade', 'rank', 'xp', 'currentStreak', 'recentStudyDates', 'updatedAt'])
+        && data.uid == uid && validName(data.displayName) && validPhoto(data.photoURL)
+        && validGrade(data.grade) && validName(data.rank)
+        && data.xp is int && data.xp >= 0
+        && data.currentStreak is int && data.currentStreak >= 0 && data.currentStreak <= 366
+        && data.recentStudyDates is list && data.recentStudyDates.size() <= 90
+        && validDate(data.updatedAt);
+    }
+    function pairId(first, second) { return first + '__' + second; }
+    function activeFriendship(otherUid) {
+      return (exists(/databases/$(database)/documents/friendships/$(pairId(request.auth.uid, otherUid)))
+          && get(/databases/$(database)/documents/friendships/$(pairId(request.auth.uid, otherUid))).data.status == 'active')
+        || (exists(/databases/$(database)/documents/friendships/$(pairId(otherUid, request.auth.uid)))
+          && get(/databases/$(database)/documents/friendships/$(pairId(otherUid, request.auth.uid))).data.status == 'active');
+    }
+    function validFriendshipCreate(friendshipId, data) {
+      return data.keys().hasOnly(['members', 'status', 'requestedBy', 'recipientId', 'createdAt', 'acceptedAt'])
+        && data.keys().hasAll(['members', 'status', 'requestedBy', 'recipientId', 'createdAt', 'acceptedAt'])
+        && data.members is list && data.members.size() == 2
+        && data.requestedBy == request.auth.uid && data.recipientId is string
+        && data.recipientId != request.auth.uid
+        && request.auth.uid in data.members && data.recipientId in data.members
+        && friendshipId in [pairId(request.auth.uid, data.recipientId), pairId(data.recipientId, request.auth.uid)]
+        && data.status == 'pending' && data.acceptedAt == null && validDate(data.createdAt)
+        && exists(/databases/$(database)/documents/profiles/$(data.recipientId));
+    }
+    function validChallenge(data) {
+      return data.keys().hasOnly(['members', 'createdBy', 'opponentId', 'creatorName', 'opponentName', 'status', 'mode', 'grade', 'curriculum', 'day', 'createdAt', 'acceptedAt', 'expiresAt'])
+        && data.keys().hasAll(['members', 'createdBy', 'opponentId', 'creatorName', 'opponentName', 'status', 'mode', 'grade', 'curriculum', 'day', 'createdAt', 'acceptedAt', 'expiresAt'])
+        && data.members is list && data.members.size() == 2
+        && data.createdBy == request.auth.uid && data.opponentId is string && data.opponentId != request.auth.uid
+        && request.auth.uid in data.members && data.opponentId in data.members
+        && validName(data.creatorName) && validName(data.opponentName)
+        && data.status == 'pending' && data.mode in ['daily', 'test']
+        && validGrade(data.grade) && validCurriculum(data.curriculum)
+        && validDate(data.day) && validDate(data.createdAt) && data.acceptedAt == null && validDate(data.expiresAt)
+        && activeFriendship(data.opponentId);
+    }
+    function validEntry(uid, data) {
+      return data.keys().hasOnly(['uid', 'correct', 'total', 'completedAt'])
+        && data.keys().hasAll(['uid', 'correct', 'total', 'completedAt'])
+        && data.uid == uid && data.uid == request.auth.uid
+        && data.correct is int && data.total is int && data.total > 0
+        && data.correct >= 0 && data.correct <= data.total && data.total <= 100
+        && validDate(data.completedAt);
+    }
+    function validNotificationShape(data) {
+      return data.keys().hasOnly(['recipientId', 'actorId', 'actorName', 'type', 'title', 'body', 'entityType', 'entityId', 'createdAt', 'readAt'])
+        && data.keys().hasAll(['recipientId', 'actorId', 'actorName', 'type', 'title', 'body', 'entityType', 'entityId', 'createdAt', 'readAt'])
+        && data.recipientId is string && data.recipientId != request.auth.uid
+        && data.actorId == request.auth.uid && validName(data.actorName)
+        && data.type in ['friend-request', 'friend-accepted', 'challenge-invite', 'challenge-accepted', 'challenge-score']
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 80
+        && data.body is string && data.body.size() > 0 && data.body.size() <= 240
+        && data.entityType in ['friendship', 'challenge'] && data.entityId is string
+        && validDate(data.createdAt) && data.readAt == null;
+    }
+    function validFriendNotification(notificationId, data) {
+      let friendship = getAfter(/databases/$(database)/documents/friendships/$(data.entityId)).data;
+      return data.entityType == 'friendship'
+        && ((data.type == 'friend-request'
+            && notificationId == 'friend-request__' + data.entityId
+            && friendship.status == 'pending' && friendship.requestedBy == data.actorId && friendship.recipientId == data.recipientId)
+          || (data.type == 'friend-accepted'
+            && notificationId == 'friend-accepted__' + data.entityId
+            && friendship.status == 'active' && friendship.requestedBy == data.recipientId && friendship.recipientId == data.actorId));
+    }
+    function validChallengeNotification(notificationId, data) {
+      let challenge = getAfter(/databases/$(database)/documents/challenges/$(data.entityId)).data;
+      return data.entityType == 'challenge'
+        && ((data.type == 'challenge-invite'
+            && notificationId == 'challenge-invite__' + data.entityId
+            && challenge.status == 'pending' && challenge.createdBy == data.actorId && challenge.opponentId == data.recipientId)
+          || (data.type == 'challenge-accepted'
+            && notificationId == 'challenge-accepted__' + data.entityId
+            && challenge.status == 'active' && challenge.createdBy == data.recipientId && challenge.opponentId == data.actorId)
+          || (data.type == 'challenge-score'
+            && notificationId == 'challenge-score__' + data.entityId + '__' + data.actorId
+            && challenge.status == 'active' && data.actorId in challenge.members && data.recipientId in challenge.members
+            && getAfter(/databases/$(database)/documents/challenges/$(data.entityId)/entries/$(data.actorId)).data.uid == data.actorId));
+    }
+
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(uid) && validAccount(uid, request.resource.data);
+      allow update: if isOwner(uid) && validAccount(uid, request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
     match /users/{uid}/progress/main {
-      allow read, delete: if isOwner(uid);
+      allow read: if isOwner(uid) || isAdmin();
+      allow delete: if isOwner(uid);
       allow create, update: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['schema', 'results', 'dates', 'grade', 'curriculum', 'lastLesson', 'updatedAt'])
         && request.resource.data.keys().hasAll(['schema', 'results', 'dates', 'grade', 'curriculum', 'lastLesson', 'updatedAt'])
@@ -14,6 +141,60 @@ service cloud.firestore {
         && request.resource.data.curriculum in ['legacy', '2026']
         && (request.resource.data.lastLesson == null || (request.resource.data.lastLesson is string && request.resource.data.lastLesson.size() <= 100))
         && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 30;
+    }
+    match /profiles/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if isOwner(uid) && validProfile(uid, request.resource.data);
+    }
+    match /friendships/{friendshipId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn() && validFriendshipCreate(friendshipId, request.resource.data);
+      allow update: if signedIn()
+        && resource.data.status == 'pending' && resource.data.recipientId == request.auth.uid
+        && request.resource.data.status == 'active' && validDate(request.resource.data.acceptedAt)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt']);
+      allow delete: if signedIn() && request.auth.uid in resource.data.members;
+    }
+    match /challenges/{challengeId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn() && validChallenge(request.resource.data);
+      allow update: if signedIn()
+        && resource.data.status == 'pending' && resource.data.opponentId == request.auth.uid
+        && request.resource.data.status in ['active', 'declined']
+        && ((request.resource.data.status == 'active' && validDate(request.resource.data.acceptedAt))
+          || (request.resource.data.status == 'declined' && request.resource.data.acceptedAt == null))
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt']);
+      match /entries/{uid} {
+        allow read: if signedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/challenges/$(challengeId)).data.members;
+        allow create: if signedIn()
+          && get(/databases/$(database)/documents/challenges/$(challengeId)).data.status == 'active'
+          && request.auth.uid in get(/databases/$(database)/documents/challenges/$(challengeId)).data.members
+          && ((get(/databases/$(database)/documents/challenges/$(challengeId)).data.mode == 'daily' && request.resource.data.total == 5)
+            || (get(/databases/$(database)/documents/challenges/$(challengeId)).data.mode == 'test' && request.resource.data.total == 12))
+          && validEntry(uid, request.resource.data);
+        allow update: if signedIn()
+          && get(/databases/$(database)/documents/challenges/$(challengeId)).data.status == 'active'
+          && request.auth.uid in get(/databases/$(database)/documents/challenges/$(challengeId)).data.members
+          && request.resource.data.total == resource.data.total
+          && request.resource.data.correct >= resource.data.correct
+          && validEntry(uid, request.resource.data);
+      }
+    }
+    match /notifications/{notificationId} {
+      allow read, delete: if signedIn() && resource.data.recipientId == request.auth.uid;
+      allow create: if signedIn() && validNotificationShape(request.resource.data)
+        && (validFriendNotification(notificationId, request.resource.data)
+          || validChallengeNotification(notificationId, request.resource.data));
+      allow update: if signedIn()
+        && ((resource.data.recipientId == request.auth.uid
+            && request.resource.data.recipientId == resource.data.recipientId
+            && validDate(request.resource.data.readAt)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']))
+          || (validNotificationShape(request.resource.data)
+            && (validFriendNotification(notificationId, request.resource.data)
+              || validChallengeNotification(notificationId, request.resource.data))));
     }
     match /{document=**} { allow read, write: if false; }
   }
