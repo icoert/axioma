@@ -65,3 +65,12 @@ Versiunea 1.2.0 include 59 de lecții, câte trei exerciții suplimentare pentru
 Termenii subliniați se explică la trecerea cursorului, focalizare cu tastatura sau atingere. Apasă Escape ori atinge în afara explicației pentru a o închide. Simbolurile formulelor au și butoane explicative pentru tastatură. Laboratoarele permit alegerea unui exemplu și resetarea la valorile acelui exemplu.
 
 Pentru dezvoltare, citește [protocolul](docs/development-protocol.md), [specificația](docs/specs/learning-expansion.md) și [analiza adaptoarelor Codex/Claude/Copilot](docs/agent-adapters.md). Cerințele produsului sunt comune; fișierele de intrare diferă doar pentru încărcarea instrucțiunilor. Notele versiunilor sunt în [CHANGELOG.md](CHANGELOG.md) și în pagina „Noutăți” din aplicație.
+
+
+### Version 1.2.2
+
+Feedback and feature requests are available at `/feedback`, with private authenticated submissions, guest drafts and administrator triage. Reminder settings live at `/remindere`: in-app reminders need an open app; the eight public calendar feeds provide daily/weekday study events at 08:00, 16:00, 18:00 or 20:00. Users subscribe in their own calendar and remove that calendar to unsubscribe. Preferences are account-scoped on each device, not cloud-synced. No email or background push service is claimed.
+
+Release acknowledgements are account-scoped locally. `public/release.json` must match the package and release feed; the app checks this uncached manifest every five minutes and when it becomes visible, and offers manual reload for newer deployments. Calendar feeds use floating local time. See [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545) for calendar recurrence/time semantics.
+
+Teaching prose uses `MathText`/`GlossaryText` for inline KaTeX and semantic MathML. Explicit `$TeX$` overrides automatic notation detection for ambiguous expressions; standalone formula blocks continue using `MathFormula`. Keep plain question IDs unchanged. Quiz shortcuts: 1–4 select an answer, Enter verifies/continues outside buttons and text fields. Timed tests show neutral milestones and no answer feedback until submission. Mistake retries have separate session storage and never award XP.

@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { MathText, InlineMath } from './MathText';
+import { mathParts } from '../lib/mathText';
 import { explainText, type Definition } from '../content/glossary';
 export function useExplanation() {
  const [active,setActive]=useState<{definition:Definition;anchor:HTMLElement}|null>(null);
@@ -17,11 +19,11 @@ export function useExplanation() {
   place();document.addEventListener('keydown',escape);document.addEventListener('pointerdown',outside);window.addEventListener('resize',place);window.addEventListener('scroll',place,true);
   return()=>{document.removeEventListener('keydown',escape);document.removeEventListener('pointerdown',outside);window.removeEventListener('resize',place);window.removeEventListener('scroll',place,true);};
  },[active]);
- const tooltip=active?createPortal(<div ref={popup} id={id} role="tooltip" className="explanation-popup" style={position} onMouseEnter={cancel} onMouseLeave={leave}><strong>{active.definition.title}</strong><p>{active.definition.explanation}</p></div>,document.body):null;
+ const tooltip=active?createPortal(<div ref={popup} id={id} role="tooltip" className="explanation-popup" style={position} onMouseEnter={cancel} onMouseLeave={leave}><strong>{active.definition.title}</strong><p><MathText text={active.definition.explanation}/></p></div>,document.body):null;
  return {active,id,open,close,leave,cancel,tooltip};
 }
 function ExplainedTerm({text,definition}:{text:string;definition:Definition}) {
  const help=useExplanation();
  return <><button type="button" className="explained-term" aria-label={`Explică «${text}»`} aria-describedby={help.active?help.id:undefined} onMouseEnter={e=>help.open(definition,e.currentTarget)} onMouseLeave={help.leave} onFocus={e=>help.open(definition,e.currentTarget)} onBlur={help.close} onClick={e=>help.open(definition,e.currentTarget)}>{text}</button>{help.tooltip}</>;
 }
-export function GlossaryText({text}:{text:string}) {return <>{explainText(text).map((part,i)=>part.definition?<ExplainedTerm key={i} text={part.text} definition={part.definition}/>:part.text)}</>;}
+export function GlossaryText({text}:{text:string}) {return <span className="math-text" data-math-text={text}>{mathParts(text).map((segment,j)=>segment.tex?<InlineMath key={j} value={segment.tex}/>:<span key={j}>{explainText(segment.text).map((part,i)=>part.definition?<ExplainedTerm key={i} text={part.text} definition={part.definition}/>:part.text)}</span>)}</span>;}

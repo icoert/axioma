@@ -10,6 +10,19 @@ export interface ProductRelease {
 
 export const productReleases:ProductRelease[]=[
  {
+  version:'1.2.2',tag:'v1.2.2',releasedAt:'2026-10-09T19:30:00+03:00',
+  title:'Un ritm bun, cu ideile tale',
+  summary:'Feedback privat, noutăți la îndemână, remindere opționale și antrenamente mai vii, cu matematică redată clar.',
+  features:[
+   'Trimite feedback, raportează o problemă sau cere o funcție nouă; ciornele sunt păstrate, iar răspunsurile echipei apar în istoricul privat.',
+   'Anunțuri despre versiuni noi pentru vizitatori și utilizatori conectați, cu indicator de noutăți și confirmare de citire.',
+   'Remindere opționale în Axioma și calendare de studiu la care te poți abona, zilnic sau luni–vineri.',
+   'Traseu de întrebări, serii de răspunsuri corecte, încurajări și scurtături de tastatură; evaluările cronometrate păstrează rezultatele ascunse până la final.',
+   'Reia separat întrebările greșite, cu explicații, fără să schimbi scorul inițial sau XP.',
+   'Expresii matematice redate cu KaTeX și MathML în recapitulări, lecții, opțiuni de răspuns, explicații și formulele laboratoarelor.'
+  ]
+ },
+ {
   version:'1.2.1',
   tag:'v1.2.1',
   releasedAt:'2026-10-09T16:51:43+03:00',

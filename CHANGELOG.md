@@ -1,5 +1,16 @@
 # Axioma · release notes
 
+## 1.2.2 — 2026-10-09
+
+- Added private feedback, problem reports and feature requests, guest drafts, account-scoped history and administrator replies/status triage. Firestore validates content, identity, timestamps and an atomic one-message-per-minute cooldown.
+- Added unread release announcements for guests and signed-in users, persistent acknowledgement, and an uncached deployment manifest that checks for newer versions while the app is open. Updates offer a manual reload without interrupting assessments.
+- Added opt-in local study reminders with daily/weekday schedules, editable times and unsubscribe controls. Hosted recurring calendar feeds support calendar subscriptions and .ics downloads; calendar apps provide reminders while Axioma is closed.
+- Added animated quiz journeys, practice answer streaks, encouragement, keyboard selection/continuation and resumable mistake retries that preserve the original score and XP. Timed tests still withhold correctness until submission.
+- Added inline KaTeX/MathML across teaching prose, examples, recap material, prompts, answers, feedback, glossary explanations, and laboratory math captions/labels. Made two ambiguous radical prompts explicit. Question IDs and saved progress remain stable.
+- Added engagement, rendered-content integrity, privacy/rules, accessibility and responsive tests.
+
+Validation: `npm run check` passed with Node 24, Java 21, and `PW_CHANNEL=chrome`: production build, 57 unit/component tests, 64 desktop/mobile Playwright scenarios, and 13 Firestore rules tests. The suite includes a full authored math-content parse/source-integrity audit, private feedback permissions and atomic cooldown, release detection, reminder scheduling/cancellation, no-XP mistake retries, timed-test integrity, accessibility, and the 12-size responsive matrix. Desktop quiz/recap and mobile reminder screens were visually reviewed.
+
 ## 1.2.1 — 2026-10-09
 
 - Replaced the lab's native example/progression dropdowns with a styled accessible picker: names, short descriptions, selected state, keyboard navigation, touch selection, Escape/outside dismissal, and viewport-aware popup placement. Reset still returns to the selected example.

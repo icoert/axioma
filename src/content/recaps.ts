@@ -57,7 +57,7 @@ export const middleSchoolTopics:Record<5|6|7|8,RecapTopic[]>={
  7:[
   topic('vii-reale','Numere reale și radicali',['Rădăcina pătrată principală este nenegativă. √(a²)=|a|, chiar dacă a este negativ.','Pentru a,b≥0, √(ab)=√a·√b. Extrage factorii care sunt pătrate perfecte pentru a simplifica radicalii.'], '\\sqrt{a^2}=|a|,\\quad\\sqrt{12}=2\\sqrt3', ['Simplifică √50.','Descompunem 50=25·2.','√50=√25·√2.','Rezultatul este 5√2.'],[
    ['√72 este:','6√2','8√2','3√2','12√2','72=36·2, iar √36=6, deci √72=6√2.'],
-   ['√(−7)² este:','7','−7','49','Nedefinit în ℝ','√(a²)=|a|; pentru a=−7 obținem 7.'],
+   ['$\\sqrt{(-7)^2}$ este:','7','−7','49','Nedefinit în ℝ','√(a²)=|a|; pentru a=−7 obținem 7.'],
    ['2√3+5√3 este:','7√3','7√6','10√3','√21','Termenii au același radical, deci adunăm coeficienții 2+5=7.']
   ]),
   topic('vii-ecuatii','Ecuații și sisteme liniare',['Păstrează egalitatea efectuând aceeași operație în ambele membre. Verifică soluția în enunțul inițial.','La sisteme, substituie o expresie dintr-o ecuație în cealaltă sau adună ecuațiile pentru a elimina o necunoscută.'], 'ax+b=0\\Rightarrow x=-\\frac ba\\quad(a\\ne0)', ['Rezolvă 3x−5=10.','Adunăm 5 în ambele membre: 3x=15.','Împărțim la 3: x=5.','Verificăm: 3·5−5=10.'],[

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { before,after,beforeEach,test } from 'node:test';
 import { assertFails,assertSucceeds,initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,updateDoc,where,writeBatch } from 'firebase/firestore';
+import { doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,updateDoc,where,writeBatch,serverTimestamp,Timestamp } from 'firebase/firestore';
 let env;
 const valid={schema:1,results:{},dates:[],grade:9,curriculum:'2026',lastLesson:null,updatedAt:'2026-10-09T12:00:00.000Z'};
 before(async()=>{env=await initializeTestEnvironment({projectId:'demo-axioma',firestore:{host:'127.0.0.1',port:8080,rules:readFileSync('firestore.rules','utf8')}});});
@@ -104,4 +104,35 @@ test('challenge scores belong to each participant and notify only the opponent',
 	await assertFails(setDoc(doc(alice.firestore(),'challenges','duel-1','entries','alice'),{uid:'alice',correct:4,total:5,completedAt:iso}));
 	await assertFails(setDoc(doc(bob.firestore(),'challenges','duel-1','entries','bob'),{uid:'bob',correct:5,total:6,completedAt:iso}));
 	await assertFails(setDoc(doc(alice.firestore(),'notifications','random-id'),notification('challenge-score','bob','alice','challenge','duel-1')));
+});
+
+const feedbackData=(uid='alice')=>({uid,kind:'feature',title:'Mai multe exemple',message:'Aș dori mai multe exemple explicate de geometrie.',status:'new',response:'',createdAt:serverTimestamp()});
+function feedbackBatch(context,id='message-1',data=feedbackData()){const database=context.firestore();const batch=writeBatch(database);batch.set(doc(database,'feedback',id),data);batch.set(doc(database,'users',data.uid,'feedbackLimits','main'),{submittedAt:serverTimestamp(),feedbackId:id});return batch;}
+test('feedback is private to owner and verified administrator, with query isolation',async()=>{
+ const alice=authed('alice');await assertSucceeds(feedbackBatch(alice).commit());
+ await assertSucceeds(getDoc(doc(alice.firestore(),'feedback','message-1')));
+ await assertSucceeds(getDocs(query(collection(alice.firestore(),'feedback'),where('uid','==','alice'))));
+ await assertFails(getDocs(collection(alice.firestore(),'feedback')));
+ await assertFails(getDoc(doc(authed('bob').firestore(),'feedback','message-1')));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'feedback','message-1')));
+ await assertSucceeds(getDocs(collection(authed('admin','silviuvaj@gmail.com',true).firestore(),'feedback')));
+ await assertFails(getDocs(collection(authed('admin','silviuvaj@gmail.com',false).firestore(),'feedback')));
+});
+test('feedback enforces atomic server timestamps, cooldown, identity and content bounds',async()=>{
+ const alice=authed('alice');const database=alice.firestore();await assertFails(setDoc(doc(database,'feedback','no-limit'),feedbackData()));
+ await assertFails(feedbackBatch(env.unauthenticatedContext()).commit());
+ await assertFails(feedbackBatch(authed('bob'),'forged',feedbackData('alice')).commit());
+ for(const patch of [{title:'x'},{message:'x'},{message:'x'.repeat(2001)},{kind:'other'},{status:'planned'},{response:'forged'},{createdAt:Timestamp.fromMillis(1)},{extra:true}])await assertFails(feedbackBatch(alice,'invalid',{...feedbackData(),...patch}).commit());
+ const spam=feedbackBatch(alice,'spam-one');spam.set(doc(database,'feedback','spam-two'),feedbackData());await assertFails(spam.commit());
+ await assertSucceeds(feedbackBatch(alice).commit());await assertFails(feedbackBatch(alice,'too-fast').commit());
+ await assertFails(deleteDoc(doc(database,'users','alice','feedbackLimits','main')));
+ await seed('users/alice/feedbackLimits/main',{submittedAt:Timestamp.fromMillis(Date.now()-61000),feedbackId:'message-1'});
+ await assertSucceeds(feedbackBatch(alice,'after-minute').commit());
+});
+test('only administrators can triage feedback and cannot alter its author or message',async()=>{
+ const alice=authed('alice');await assertSucceeds(feedbackBatch(alice).commit());const admin=authed('admin','silviuvaj@gmail.com',true).firestore();const ref=doc(admin,'feedback','message-1');
+ await assertFails(updateDoc(doc(alice.firestore(),'feedback','message-1'),{status:'closed'}));
+ await assertSucceeds(updateDoc(ref,{status:'planned',response:'Vom adăuga exemple în curând.'}));
+ await assertFails(updateDoc(ref,{uid:'admin'}));await assertFails(updateDoc(ref,{message:'altered'}));await assertFails(updateDoc(ref,{status:'invalid'}));await assertFails(updateDoc(ref,{response:'x'.repeat(1001)}));
+ await assertSucceeds(deleteDoc(doc(alice.firestore(),'feedback','message-1')));
 });

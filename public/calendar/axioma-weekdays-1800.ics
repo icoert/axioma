@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Axioma//Remindere de studiu//RO
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Axioma - zece minute de matematica
+BEGIN:VEVENT
+UID:axioma-weekdays-1800@axioma-matematica-ro.web.app
+DTSTAMP:20261009T140000Z
+DTSTART:20260105T180000
+DURATION:PT10M
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
+SUMMARY:Un pas mic in Axioma
+DESCRIPTION:Zece minute de matematica. Continua parcursul in Axioma.
+URL:https://axioma-matematica-ro.web.app/provocari
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Un exercitiu azi conteaza.
+TRIGGER:PT0M
+END:VALARM
+END:VEVENT
+END:VCALENDAR

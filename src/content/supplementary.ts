@@ -47,7 +47,7 @@ export const supplementary: Record<string, Exercise[]> = {
  ['Pentru 2x²−8x+6=0, produsul rădăcinilor este:','3','6','4','−3','Produsul este c/a=6/2=3.']
  ],
  radicali:[
- ['√(−5)² este:','5','−5','25','Nereal','√(x²)=|x|; pentru x=−5 rezultatul este 5.'],
+ ['$\\sqrt{(-5)^2}$ este:','5','−5','25','Nereal','√(x²)=|x|; pentru x=−5 rezultatul este 5.'],
  ['Domeniul lui √(2x−6) este:','[3,∞)','(3,∞)','ℝ','(−∞,3]','Radicandul trebuie să fie nenegativ: 2x−6≥0, deci x≥3.'],
  ['Raționalizarea lui 1/√3 dă:','√3/3','√3','3√3','1/3','Înmulțim numărătorul și numitorul cu √3; numitorul devine 3.']
  ],

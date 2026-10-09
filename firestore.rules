@@ -196,6 +196,39 @@ service cloud.firestore {
             && (validFriendNotification(notificationId, request.resource.data)
               || validChallengeNotification(notificationId, request.resource.data))));
     }
+    function validFeedback(data) {
+      return data.keys().hasOnly(['uid', 'kind', 'title', 'message', 'status', 'response', 'createdAt'])
+        && data.keys().hasAll(['uid', 'kind', 'title', 'message', 'status', 'response', 'createdAt'])
+        && data.uid == request.auth.uid && data.kind in ['feedback', 'feature', 'problem']
+        && data.title is string && data.title.size() >= 5 && data.title.size() <= 100
+        && data.message is string && data.message.size() >= 20 && data.message.size() <= 2000
+        && data.status == 'new' && data.response == '' && data.createdAt == request.time;
+    }
+    function feedbackCooldown(uid) {
+      return !exists(/databases/$(database)/documents/users/$(uid)/feedbackLimits/main)
+        || request.time >= get(/databases/$(database)/documents/users/$(uid)/feedbackLimits/main).data.submittedAt + duration.value(60, 's');
+    }
+    match /users/{uid}/feedbackLimits/main {
+      allow get: if isOwner(uid);
+      allow create, update: if isOwner(uid) && feedbackCooldown(uid)
+        && request.resource.data.keys().hasOnly(['submittedAt', 'feedbackId'])
+        && request.resource.data.feedbackId is string && request.resource.data.feedbackId.size() <= 100
+        && request.resource.data.submittedAt == request.time
+        && getAfter(/databases/$(database)/documents/feedback/$(request.resource.data.feedbackId)).data.uid == uid
+        && getAfter(/databases/$(database)/documents/feedback/$(request.resource.data.feedbackId)).data.createdAt == request.time;
+    }
+    match /feedback/{feedbackId} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if signedIn() && validFeedback(request.resource.data)
+        && feedbackCooldown(request.auth.uid)
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/feedbackLimits/main).data.submittedAt == request.time
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/feedbackLimits/main).data.feedbackId == feedbackId;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'response'])
+        && request.resource.data.status in ['new', 'planned', 'closed']
+        && request.resource.data.response is string && request.resource.data.response.size() <= 1000;
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }
