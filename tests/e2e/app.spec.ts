@@ -48,11 +48,16 @@ test('community asks guests to sign in and admin access stays restricted',async(
  await page.goto('/admin');await expect(page.getByRole('heading',{name:'Panoul de administrare'})).toBeVisible();await expect(page.getByText('Conectează-te cu un cont de administrator.')).toBeVisible();
 });
 
+test('release history reflects product pushes',async({page})=>{
+ await page.goto('/noutati');await expect(page.getByRole('heading',{name:'Ce e nou în Axioma.'})).toBeVisible();const history=page.getByRole('region',{name:'Istoricul lansărilor'});await expect(history.getByText('v1.1.0')).toBeVisible();await expect(history.getByText('v1.0.0')).toBeVisible();await expect(page.getByRole('link',{name:/Commit 586f02b/})).toHaveAttribute('href','https://github.com/icoert/axioma/commit/586f02b');await expect(page.getByText('Panou de administrare cu statistici generale și progres detaliat pe utilizator.')).toBeVisible();
+ await page.setViewportSize({width:780,height:900});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+});
+
 test('invalid storage recovers without crashing',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('axioma:guest','{bad json'));await page.goto('/');await expect(page.getByRole('heading',{name:/Salut/})).toBeVisible();await expect(page.locator('.xp-chip')).toContainText('0 XP');
 });
 
 test('all primary pages fit the viewport and have no serious accessibility violations',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
- for(const route of ['/','/materie','/laborator','/provocari','/prieteni','/ranguri','/viitor','/cont','/admin','/lectie/gradul-doi','/quiz/lesson/logica']){await page.goto(route);await expect(page.locator('h1')).toBeVisible();await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.filter(v=>['critical','serious'].includes(v.impact??'')).map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))})),`${route}: ${JSON.stringify(result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})))}`).toEqual([]);}
+ for(const route of ['/','/materie','/laborator','/provocari','/prieteni','/ranguri','/noutati','/viitor','/cont','/admin','/lectie/gradul-doi','/quiz/lesson/logica']){await page.goto(route);await expect(page.locator('h1')).toBeVisible();await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(result.violations.filter(v=>['critical','serious'].includes(v.impact??'')).map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,reason:n.failureSummary}))})),`${route}: ${JSON.stringify(result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})))}`).toEqual([]);}
 });
