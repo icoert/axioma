@@ -1,6 +1,7 @@
 export interface ProductRelease {
  version:string;
- commit:string;
+ commit?:string;
+ tag?:string;
  releasedAt:string;
  title:string;
  summary:string;
@@ -8,6 +9,21 @@ export interface ProductRelease {
 }
 
 export const productReleases:ProductRelease[]=[
+ {
+  version:'1.2.0',
+  tag:'v1.2.0',
+  releasedAt:'2026-10-09T16:10:00+03:00',
+  title:'Mai multe feluri de a înțelege',
+  summary:'Exemple ghidate, explicații la îndemână și exerciții noi pentru fiecare lecție.',
+  features:[
+   'Nouă laboratoare interactive, cu 27 de exemple ghidate și resetare la exemplul ales.',
+   'Experimente noi pentru numere complexe, exponențiale, progresii și probabilitate binomială.',
+   'Explicații în română pentru termeni și simboluri, disponibile la trecerea cursorului, focalizare și atingere.',
+   '177 de exerciții suplimentare: câte trei pentru fiecare dintre cele 59 de lecții.',
+   'Sesiuni suplimentare reluabile, cu explicații, fără schimbarea scorului de stăpânire sau XP.',
+   'Navigare cu tastatura între laboratoare și respectarea preferinței pentru mișcare redusă.'
+  ]
+ },
  {
   version:'1.1.0',
   commit:'586f02b',

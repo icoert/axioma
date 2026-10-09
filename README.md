@@ -50,3 +50,10 @@ npm run deploy -- --project ID_PROIECT_FIREBASE
 ```
 
 Comanda publică directorul `dist` și regulile Firestore. Nu include fișierul `.env.local` în controlul versiunilor.
+## Învățare și contribuții
+
+Versiunea 1.2.0 include 59 de lecții, câte trei exerciții suplimentare pentru fiecare și nouă laboratoare cu 27 de exemple ghidate. Exercițiile suplimentare se reiau din aceeași filă după reîncărcare și nu acordă XP; verificările de stăpânire își păstrează regulile existente. Progresul acestui antrenament rămâne în sesiunea browserului, fără sincronizare Firebase.
+
+Termenii subliniați se explică la trecerea cursorului, focalizare cu tastatura sau atingere. Apasă Escape ori atinge în afara explicației pentru a o închide. Simbolurile formulelor au și butoane explicative pentru tastatură. Laboratoarele permit alegerea unui exemplu și resetarea la valorile acelui exemplu.
+
+Pentru dezvoltare, citește [protocolul](docs/development-protocol.md), [specificația](docs/specs/learning-expansion.md) și [analiza adaptoarelor Codex/Claude/Copilot](docs/agent-adapters.md). Cerințele produsului sunt comune; fișierele de intrare diferă doar pentru încărcarea instrucțiunilor. Notele versiunilor sunt în [CHANGELOG.md](CHANGELOG.md) și în pagina „Noutăți” din aplicație.

@@ -32,3 +32,16 @@
 @media(max-width:980px){.release-hero{grid-template-columns:1fr}.release-entry{grid-template-columns:46px minmax(0,1fr);gap:20px}.release-marker{grid-row:1/3}.release-meta,.release-details{grid-column:2}.release-details ul{grid-template-columns:1fr}}
 @media(max-width:760px){.release-trigger{width:34px;height:34px}.release-hero{padding:25px 20px;margin-bottom:27px;gap:24px}.release-hero h1{font-size:2rem}.release-hero dl{grid-template-columns:1fr 1fr}.release-hero dl>div{padding:13px 9px 0}.release-hero dl>div:nth-child(3){grid-column:1/3;border-left:0;padding-left:0;margin-top:13px}.release-entry{grid-template-columns:34px minmax(0,1fr);gap:13px;padding-bottom:34px}.release-marker{grid-row:1/3}.release-marker>span{width:30px;height:30px}.release-marker::after{top:34px}.release-meta,.release-details{grid-column:2}.release-details ul{grid-template-columns:1fr}.release-labels{align-items:flex-start;flex-direction:column}.release-meta h2{font-size:1.25rem}.release-next{align-items:flex-start;flex-direction:column;padding:22px}.release-next .button{width:100%}.footer-links{gap:10px}.footer-links>a:first-child{display:none}}
 .release-details .eyebrow{color:#536547}.release-next .eyebrow{color:#4e5d51}
+
+/* Inline explanations keep the reading rhythm and work with focus or tap. */
+.explained-term{font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px dotted #62784b;padding:0;display:inline;cursor:help;text-align:inherit;border-radius:2px}
+.explained-term:hover,.explained-term:focus-visible,.explained-symbol:hover,.explained-symbol:focus-visible{background:#e5f4d3;color:#223729;outline:2px solid #547b2f;outline-offset:2px}
+.explained-symbol{cursor:help;border-bottom:1px dotted #62784b}
+.explanation-popup{position:fixed;z-index:1000;width:280px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow:auto;padding:16px 18px;background:#223729;color:#fff;border:1px solid #5d775a;border-radius:14px;box-shadow:0 12px 35px #182b2533;font-size:14px;line-height:1.55;animation:explanation-in .15s ease-out}
+.explanation-popup strong{color:#d0f398;display:block;margin-bottom:5px}.explanation-popup p{margin:0;color:#fff}
+.extra-practice{border-top:1px solid #dce4d4;margin-top:22px;padding-top:18px}.extra-practice h3{font-size:17px;margin:0 0 8px}.extra-practice .button{width:100%}
+@keyframes explanation-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.explanation-popup{animation:none}}
+.lab-example-picker{display:flex;flex-direction:column;gap:6px;padding:12px 18px;font-size:13px;font-weight:600}.lab-example-picker select{width:100%;min-width:0;border:1px solid #d3dec9;border-radius:9px;background:#fff;color:#293c2f;padding:10px;font:inherit}.lab-investigation{padding:0 20px;font-size:14px;line-height:1.7}.symbol-help{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding-top:12px;font:13px 'DM Sans',sans-serif}.symbol-help button{padding:4px 8px}
+
+.lab .explained-term{border-bottom-color:currentColor}
